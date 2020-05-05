@@ -31,12 +31,10 @@ public class ListViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_list_view);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         ListView list = findViewById(R.id.list);
-
-        saveDateToSharedPref();
-
+        textSharedPref = getSharedPreferences("my_prefs", MODE_PRIVATE);
         String text = textSharedPref.getString(NOTE_TXT, "");
+        saveDateToSharedPref();
         String[] titles = text.split("\n\n");
         for (String title : titles) {
             Map<String, String> map = new HashMap<>();
@@ -44,15 +42,8 @@ public class ListViewActivity extends AppCompatActivity {
             map.put(KEY_COUNT, title.length() + "");
             simpleAdapterContent.add(map);
         }
-
-
         BaseAdapter listContentAdapter = createAdapter(simpleAdapterContent);
-
         list.setAdapter(listContentAdapter);
-
-        textSharedPref = getSharedPreferences("my_prefs", MODE_PRIVATE);
-
-
     }
 
     private void saveDateToSharedPref() {
@@ -65,8 +56,8 @@ public class ListViewActivity extends AppCompatActivity {
     }
 
     @NonNull
-    private BaseAdapter createAdapter(List<Map<String, String>> values) {
-        return new SimpleAdapter(this, values, R.layout.double_text, new String[]
+    private BaseAdapter createAdapter(List<Map<String, String>> text) {
+        return new SimpleAdapter(this, text, R.layout.double_text, new String[]
                 {KEY_TEXT, KEY_COUNT}, new int[]{R.id.textViewTop, R.id.textViewBottom});
     }
 }
