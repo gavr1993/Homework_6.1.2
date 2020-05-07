@@ -11,7 +11,6 @@ import android.widget.SimpleAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
@@ -32,12 +31,21 @@ public class ListViewActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_list_view);
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        final BaseAdapter listContentAdapter = createAdapter(simpleAdapterContent);
+        final ListView list = findViewById(R.id.list);
+        list.setAdapter(listContentAdapter);
+        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                simpleAdapterContent.remove(position);
+                listContentAdapter.notifyDataSetChanged();
+            }
+        });
 
         textSharedPref = getSharedPreferences("my_prefs", MODE_PRIVATE);
         saveDateToSharedPref();
         loadDateFromSharedPref();
+        listContentAdapter.notifyDataSetChanged();
         swipeRefresh = findViewById(R.id.swipeRefresh);
         swipeRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -45,10 +53,13 @@ public class ListViewActivity extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        swipeRefresh.setRefreshing(false)
-                        ;
+                        simpleAdapterContent.clear();
+                        listContentAdapter.notifyDataSetChanged();
+                        loadDateFromSharedPref();
+                        listContentAdapter.notifyDataSetChanged();
+                        swipeRefresh.setRefreshing(false);
                     }
-                }, 5000);
+                }, 100);
             }
         });
     }
@@ -62,17 +73,6 @@ public class ListViewActivity extends AppCompatActivity {
             map.put(KEY_COUNT, title.length() + "");
             simpleAdapterContent.add(map);
         }
-
-        final BaseAdapter listContentAdapter = createAdapter(simpleAdapterContent);
-        ListView list = findViewById(R.id.list);
-        list.setAdapter(listContentAdapter);
-        list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                simpleAdapterContent.remove(position);
-                listContentAdapter.notifyDataSetChanged();
-            }
-        });
     }
 
     private void saveDateToSharedPref() {
