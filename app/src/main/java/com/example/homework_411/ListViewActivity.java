@@ -47,11 +47,8 @@ public class ListViewActivity extends AppCompatActivity {
     }
 
     private void saveDateToSharedPref() {
-        SharedPreferences.Editor myEditor = textSharedPref.edit();
-        if (textSharedPref.equals("")) {
-            String text = getString(R.string.large_text);
-            myEditor.putString(NOTE_TXT, text);
-            myEditor.apply();
+        if (textSharedPref.getString(NOTE_TXT, "").isEmpty()) {
+            textSharedPref.edit().putString(NOTE_TXT, getString(R.string.large_text)).apply();
         }
     }
 
