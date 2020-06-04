@@ -25,7 +25,11 @@ public class ListViewActivity extends AppCompatActivity {
     private static final String NOTE_TXT = "note_txt";
     private SwipeRefreshLayout swipeRefresh;
     private SharedPreferences textSharedPref;
+    private static final String INDEXES_BUNDLE_KEY = "indexes of items to delete: ";
     List<Map<String, String>> simpleAdapterContent = new ArrayList<>();
+    ArrayList<Integer> indexes;
+    Bundle bundle;
+    BaseAdapter listContentAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +43,8 @@ public class ListViewActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 simpleAdapterContent.remove(position);
                 listContentAdapter.notifyDataSetChanged();
+                indexes = new ArrayList<>();
+                indexes.add(position);
             }
         });
 
@@ -64,6 +70,12 @@ public class ListViewActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle bundle) {
+        super.onSaveInstanceState(bundle);
+        bundle.putIntegerArrayList(INDEXES_BUNDLE_KEY, indexes);
+    }
+
     private void loadDateFromSharedPref() {
         String text = textSharedPref.getString(NOTE_TXT, "");
         final String[] titles = text.split("\n\n");
@@ -85,5 +97,19 @@ public class ListViewActivity extends AppCompatActivity {
     private BaseAdapter createAdapter(List<Map<String, String>> text) {
         return new SimpleAdapter(this, text, R.layout.double_text, new String[]
                 {KEY_TEXT, KEY_COUNT}, new int[]{R.id.textViewTop, R.id.textViewBottom});
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(bundle!=null) {
+            indexes = bundle.getIntegerArrayList(INDEXES_BUNDLE_KEY);
+            if (indexes != null) {
+                for (Integer indexInt : indexes) {
+                    simpleAdapterContent.remove(indexInt.intValue());
+                }
+            }
+            listContentAdapter.notifyDataSetChanged();
+        }
     }
 }
